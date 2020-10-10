@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,12 +7,46 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Runtime.InteropServices;
+
 
 namespace sockets
 {
+    class CreatedGame
+    {
+        public string lobby_name { get; set; }
+        public string player_name { get; set; }
+        public string password { get; set; }
+    }
+    class Game
+    {
+        public string game_id { get; set; }
+        public string player_name { get; set; }
+        public string password { get; set; }
+    }
+    class Json
+    {
+        public string code { get; set; }
+        public object args { get; set; }
+    }
+    class JsonWithJwt : Json
+    {
+        public string jwt { get; set; }
+    }
+    class Turn
+    {
+        public Card[] cards { get; set; }
+    }
     class Program
     {
-        public string CommandHandler(string action, object[] args)
+
+        public static Card[] strToCardArray(string Carsstr)
+        {
+            Card[] a = new Card[2];
+            return a;
+        }
+        public static string CommandHandler(string action, string[] args)
         {
             /*
              * Autor: Yuval Didi
@@ -19,24 +54,89 @@ namespace sockets
              *  this func get the action of the bot and the required arguments
              *  and returns the message according to the protocol
              */
-            return action;
+
+
+            string json = "";
+            Json jsonObj;
+            switch (action)
+            {
+                case "create_game":
+                    CreatedGame createdGame = new CreatedGame()
+                    {
+
+                        lobby_name = args[0],
+                        player_name = args[1],
+                        password = args[2]
+                    };
+                    jsonObj = new Json()
+                    {
+                        code = action,
+                        args = createdGame
+                    };
+                    break;
+                case "join_game":
+                    Game game = new Game()
+                    {
+
+                        game_id = args[0],
+                        player_name = args[1],
+                        password = args[2]
+                    };
+                    jsonObj = new Json()
+                    {
+                        code = action,
+                        args = game
+                    };
+                    break;
+                case "place_cards":
+                    Turn turn = new Turn()
+                    {
+                        //we should think about something here
+                        cards = strToCardArray(args[1])
+                    };
+                    jsonObj = new JsonWithJwt()
+                    {
+                        code = action,
+                        args = turn,
+                        jwt = args[0]
+                    };
+                    break;
+                default:
+                    // when the action is: leave_game or start_game
+                    jsonObj = new JsonWithJwt()
+                    {
+                        code = action,
+                        args = null,
+                        jwt = args[0]
+                    };
+                    break;
+            }
+            json = JsonConvert.SerializeObject(jsonObj);
+            return json;
+
         }
-        public object DataAnalyzing(string action, string recv_str)
+        public object[] DataAnalyzing(string action, string recv_str)
         {
             /*
              * Autor: Yuval Didi
              * About The Func:
              *  this func analyize the server's response
              */
-            return action;
+
+            dynamic respondJson = JsonConvert.DeserializeObject(recv_str);
+            string[] jsonArgs = new string[2];
+            jsonArgs[0] = respondJson.code;
+            jsonArgs[1] = respondJson.args;
+            return jsonArgs;
         }
-        public object GameHandler(Socket serverSock, string action, object[] args)
+        public object GameHandler(Socket serverSock, string action, string[] args)
         {
             /*
              * Autor: Yuval Didi
              * About The Func:
              *  this func manage the communication with the server
              */
+            string recv_str;
             try
             {
                 if (action == "CLOSE")
@@ -49,7 +149,7 @@ namespace sockets
                 byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
                 byte[] recv_bytes = new byte[1024];
 
-                string recv_str;
+
 
                 //send the data
                 int bytesSent = serverSock.Send(msg_bytes);
@@ -128,6 +228,9 @@ namespace sockets
 
         static void Main(string[] args)
         {
+            string action = "create";
+            string[] args1 = new string[] { "name", "palyer", "3" };
+            Console.WriteLine(CommandHandler(action, args1));
             Console.WriteLine("Amung Us?");
         }
     }
