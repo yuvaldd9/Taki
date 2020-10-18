@@ -1,18 +1,14 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.Http.Headers;
 using Newtonsoft.Json;
-using System.Runtime.InteropServices;
 
 
 namespace sockets
 {
+
     class CreatedGame
     {
         public string lobby_name { get; set; }
@@ -38,6 +34,7 @@ namespace sockets
     {
         public Card[] cards { get; set; }
     }
+
     class Program
     {
 
@@ -136,7 +133,6 @@ namespace sockets
              * About The Func:
              *  this func manage the communication with the server
              */
-            string recv_str;
             try
             {
                 if (action == "CLOSE")
@@ -145,20 +141,23 @@ namespace sockets
                     serverSock.Close();
                     return 0;
                 }
+                else if (action != "NOT MY TURN")
+                {
+                    //send the data
+                    byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
+                    int bytesSent = serverSock.Send(msg_bytes);
+                    Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
+                    Console.WriteLine("[Communication] Waiting For Response...");
+                }
 
-                byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
-                byte[] recv_bytes = new byte[1024];
-
-
-
-                //send the data
-                int bytesSent = serverSock.Send(msg_bytes);
-                Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
-                Console.WriteLine("[Communication] Waiting For Response...");
 
                 //receiving the response from the server
+                string recv_str;
+                byte[] recv_bytes = new byte[1024];
                 int bytesRec = serverSock.Receive(recv_bytes);
                 recv_str = Encoding.ASCII.GetString(recv_bytes, 0, bytesRec);
+
+
 
                 return DataAnalyzing(action, recv_str);
             }
