@@ -11,18 +11,22 @@ namespace sockets
 
     class CreatedGame
     {
+        public string jwt { get; set; }
         public string lobby_name { get; set; }
         public string player_name { get; set; }
         public string password { get; set; }
     }
     class Game
     {
+        public string jwt { get; set; }
         public string game_id { get; set; }
         public string player_name { get; set; }
         public string password { get; set; }
     }
     class Json
     {
+
+
         public string code { get; set; }
         public object args { get; set; }
     }
@@ -32,16 +36,20 @@ namespace sockets
     }
     class Turn
     {
+        public string jwt { get; set; }
         public Card[] cards { get; set; }
     }
 
     class Program
     {
 
-        public static Card[] strToCardArray(string Carsstr)
+        public static Card[] strToCardArray(string CardStr)
         {
-            Card[] a = new Card[2];
-            return a;
+            /*
+             * temp for the merge
+             */
+            Card[] cards = new Card[2];
+            return cards;
         }
         public static string CommandHandler(string action, string[] args)
         {
@@ -89,22 +97,21 @@ namespace sockets
                     Turn turn = new Turn()
                     {
                         //we should think about something here
-                        cards = strToCardArray(args[1])
+                        cards = strToCardArray(args[1]),
+                        jwt = args[2]
                     };
-                    jsonObj = new JsonWithJwt()
+                    jsonObj = new Json()
                     {
                         code = action,
-                        args = turn,
-                        jwt = args[0]
+                        args = turn
                     };
                     break;
                 default:
                     // when the action is: leave_game or start_game
-                    jsonObj = new JsonWithJwt()
+                    jsonObj = new Json()
                     {
                         code = action,
-                        args = null,
-                        jwt = args[0]
+                        args = null
                     };
                     break;
             }
