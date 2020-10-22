@@ -35,5 +35,10 @@ namespace Taki_Client
         {
             this.cards.Add(new Card(card));
         }
+
+        public IEnumerator<Card> GetEnumerator()
+        {
+            return this.cards.GetEnumerator();
+        }
     }
 }
