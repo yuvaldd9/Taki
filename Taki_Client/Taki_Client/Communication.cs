@@ -104,6 +104,13 @@ namespace sockets
                         args = new token() { jwt = args[0]}
                     }
                     break;
+                case "take_cards":
+                    jsonObj = new Json()
+                    {
+                        code = action,
+                        args = new token() { jwt = args[0] }
+                    }
+                    break;
                 default:
                     // when the action is: leave_game or start_game
                     jsonObj = new Json()
