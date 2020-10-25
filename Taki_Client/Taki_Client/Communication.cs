@@ -18,11 +18,11 @@ namespace sockets
     }
     class Game
     {
-        public string jwt { get; set; }
         public string game_id { get; set; }
         public string player_name { get; set; }
         public string password { get; set; }
     }
+
     class Json
     {
 
@@ -30,28 +30,20 @@ namespace sockets
         public string code { get; set; }
         public object args { get; set; }
     }
-    class JsonWithJwt : Json
-    {
-        public string jwt { get; set; }
-    }
     class Turn
     {
         public string jwt { get; set; }
         public Card[] cards { get; set; }
     }
-
+    
+    class token
+    {
+        public string jwt { get; set; }
+    }
     class Program
     {
 
-        public static Card[] strToCardArray(string CardStr)
-        {
-            /*
-             * temp for the merge
-             */
-            Card[] cards = new Card[2];
-            return cards;
-        }
-        public static string CommandHandler(string action, string[] args)
+        public static string CommandHandler(string action, object args[])
         {
             /*
              * Autor: Yuval Didi
@@ -61,7 +53,6 @@ namespace sockets
              */
 
 
-            string json = "";
             Json jsonObj;
             switch (action)
             {
@@ -96,15 +87,22 @@ namespace sockets
                 case "place_cards":
                     Turn turn = new Turn()
                     {
-                        //we should think about something here
-                        cards = strToCardArray(args[1]),
-                        jwt = args[2]
+                     
+                        cards = args[0],
+                        jwt = args[1]
                     };
                     jsonObj = new Json()
                     {
                         code = action,
                         args = turn
                     };
+                    break;
+                case "leave_game":
+                    jsonObj = new Json()
+                    {
+                        code = action,
+                        args = new token() { jwt = args[0]}
+                    }
                     break;
                 default:
                     // when the action is: leave_game or start_game
@@ -115,8 +113,8 @@ namespace sockets
                     };
                     break;
             }
-            json = JsonConvert.SerializeObject(jsonObj);
-            return json;
+            
+            return JsonConvert.SerializeObject(jsonObj);
 
         }
         public object[] DataAnalyzing(string action, string recv_str)
@@ -186,7 +184,7 @@ namespace sockets
 
 
         }
-        public static Socket StartClient()
+        public static Socket StartClient(string serverIpStr, int serverPort)
         {
             /*
              * Autor: Yuval Didi
@@ -203,7 +201,8 @@ namespace sockets
                 // This example uses port 11000 on the local computer.
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
+                IPAddress serverIp = IPAddress.Parse(serverIpStr);
+                IPEndPoint remoteEP = new IPEndPoint(serverIp, serverPort);
 
                 //Create a TCP/IP socket
                 Socket serverSock = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -229,15 +228,6 @@ namespace sockets
             }
 
             return null;
-        }
-
-
-        static void Main(string[] args)
-        {
-            string action = "create";
-            string[] args1 = new string[] { "name", "palyer", "3" };
-            Console.WriteLine(CommandHandler(action, args1));
-            Console.WriteLine("Amung Us?");
         }
     }
 }
