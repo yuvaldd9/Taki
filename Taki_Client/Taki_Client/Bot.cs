@@ -15,7 +15,7 @@ namespace Taki_Client
         private List<Enemy> enemies;
         private List<Rule> rules;
         private int numOfPlayers;
-        private const int LOW_CARDS = 3;
+        private const int LOW_CARDS = 3; //Constant for the state generator
 
         public Bot(Card topCard, Deck deck, List<Enemy> enemies)
         {
