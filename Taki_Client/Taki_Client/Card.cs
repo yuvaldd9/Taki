@@ -6,30 +6,30 @@ using System.Threading.Tasks;
 
 namespace Taki_Client
 {
-    public enum ValidTypes {number_card, plus, plus_2, stop, change_direction, change_color, taki, super_taki}
-    public enum ValidColors {red, blue, green, yellow, all};
+    public enum ValidTypes { number_card, plus, plus_2, stop, change_direction, change_color, taki, super_taki }
+    public enum ValidColors { red, blue, green, yellow, all };
 
     class Card
     {
         private string type;
         private string color;
-        private int value;
+        private string value;
 
         public string Type { get => type; }
         public string Color { get => color; }
-        public int Value { get => value; }
+        public string Value { get => value; }
 
-        public Card(string type, string color, int value)
+        public Card(string type, string color, string value)
         {
-            if(!Array.Exists(Enum.GetNames(typeof(ValidTypes)), card_type => card_type == type))
+            if (!Array.Exists(Enum.GetNames(typeof(ValidTypes)), card_type => card_type == type))
             {
                 throw new ArgumentException("Illegal type", "type");
             }
-            if(!Array.Exists(Enum.GetNames(typeof(ValidColors)), card_color => card_color == color))
+            if (!Array.Exists(Enum.GetNames(typeof(ValidColors)), card_color => card_color == color || card_color == ""))
             {
                 throw new ArgumentException("Illegal color", "color");
             }
-            if(value < 1 || value > 9)
+            if (value != "" && (int.Parse(value) < 1 || int.Parse(value) > 9))
             {
                 throw new ArgumentException("Illegal value", "value");
             }
@@ -47,7 +47,7 @@ namespace Taki_Client
 
         public override bool Equals(object obj)
         {
-            if(obj is Card) return this.Equals((Card)obj);
+            if (obj is Card) return this.Equals((Card)obj);
             return false;
         }
 

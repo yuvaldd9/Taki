@@ -11,14 +11,16 @@ namespace Taki_Client
         private int numOfCards;
         private int relativePosition; // the number of the player according to the playing order if our bot is number 0
 
+        public string name { get; set; }
         public int NumOfCards { get { return numOfCards; } }
         public int Position { get { return this.relativePosition; } }
         private const int INITIAL_NUM_OF_CARDS = 8;
 
-        public Enemy(int relativePosition)
+        public Enemy(string name, int relativePosition)
         {
             this.numOfCards = INITIAL_NUM_OF_CARDS;
             this.relativePosition = relativePosition;
+            this.name = name;
         }
 
         public void UpdateState(int numOfCardsPlayed)
@@ -33,7 +35,7 @@ namespace Taki_Client
         {
             /*
              * To be executed when change direction card is played
-             */ 
+             */
             this.relativePosition = numOfPlayers - this.relativePosition;
         }
     }
