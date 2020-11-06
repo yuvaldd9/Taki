@@ -1,0 +1,12 @@
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.csprojAssemblyReference.cache
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.Properties.Resources.resources
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.csproj.GenerateResource.cache
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.csproj.CoreCompileInputs.cache
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\bin\Debug\Taki_Client.exe.config
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\bin\Debug\Taki_Client.exe
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\bin\Debug\Taki_Client.pdb
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\bin\Debug\Newtonsoft.Json.dll
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\bin\Debug\Newtonsoft.Json.xml
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.csproj.CopyComplete
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.exe
+C:\Cyber\Taki\Taki\Taki_Client\Taki_Client\obj\Debug\Taki_Client.pdb
