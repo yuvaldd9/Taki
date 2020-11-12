@@ -4,9 +4,12 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.CSharp.RuntimeBinder;
 
 
-namespace sockets
+namespace Taki_Client
 {
 
     class CreatedGame
@@ -35,15 +38,15 @@ namespace sockets
         public string jwt { get; set; }
         public Card[] cards { get; set; }
     }
-    
+
     class token
     {
         public string jwt { get; set; }
     }
-    class Program
+    class Communication
     {
 
-        public static string CommandHandler(string action, object args[])
+        public static string CommandHandler(string action, object[] args)
         {
             /*
              * Autor: Yuval Didi
@@ -60,9 +63,9 @@ namespace sockets
                     CreatedGame createdGame = new CreatedGame()
                     {
 
-                        lobby_name = args[0],
-                        player_name = args[1],
-                        password = args[2]
+                        lobby_name = (string)args[0],
+                        player_name = (string)args[1],
+                        password = (string)args[2]
                     };
                     jsonObj = new Json()
                     {
@@ -74,9 +77,9 @@ namespace sockets
                     Game game = new Game()
                     {
 
-                        game_id = args[0],
-                        player_name = args[1],
-                        password = args[2]
+                        game_id = (string)args[0],
+                        player_name = (string)args[1],
+                        password = (string)args[2]
                     };
                     jsonObj = new Json()
                     {
@@ -84,12 +87,19 @@ namespace sockets
                         args = game
                     };
                     break;
+                case "start_game":
+                    jsonObj = new Json()
+                    {
+                        code = action,
+                        args = new token() { jwt = (string)args[0] }
+                    };
+                    break;
                 case "place_cards":
                     Turn turn = new Turn()
                     {
-                     
-                        cards = args[0],
-                        jwt = args[1]
+
+                        cards = (Card[])args[0],
+                        jwt = (string)args[1]
                     };
                     jsonObj = new Json()
                     {
@@ -101,15 +111,15 @@ namespace sockets
                     jsonObj = new Json()
                     {
                         code = action,
-                        args = new token() { jwt = args[0]}
-                    }
+                        args = new token() { jwt = (string)args[0] }
+                    };
                     break;
                 case "take_cards":
                     jsonObj = new Json()
                     {
                         code = action,
-                        args = new token() { jwt = args[0] }
-                    }
+                        args = new token() { jwt = (string)args[0] }
+                    };
                     break;
                 default:
                     // when the action is: leave_game or start_game
@@ -120,11 +130,11 @@ namespace sockets
                     };
                     break;
             }
-            
+
             return JsonConvert.SerializeObject(jsonObj);
 
         }
-        public object[] DataAnalyzing(string action, string recv_str)
+        public static string[] DataAnalyzing(string action, string message)
         {
             /*
              * Autor: Yuval Didi
@@ -132,13 +142,34 @@ namespace sockets
              *  this func analyize the server's response
              */
 
-            dynamic respondJson = JsonConvert.DeserializeObject(recv_str);
-            string[] jsonArgs = new string[2];
-            jsonArgs[0] = respondJson.code;
-            jsonArgs[1] = respondJson.args;
-            return jsonArgs;
+            List<string> responses = new List<string>();
+            int counter = 0;
+            int lastIndex = 0;
+            bool isName = false;
+            for (int i = 0; i < message.Length; i++)
+            {
+                if (message[i] == '\"')
+                    isName = !isName;
+                if (isName)
+                    continue;
+                if (message[i] == '{')
+                    counter += 1;
+                if (message[i] == '}')
+                    counter -= 1;
+                if (counter == 0)
+                {
+                    responses.Add(message.Substring(lastIndex, i - lastIndex + 1));
+                    lastIndex = i + 1;
+                }
+            }
+            string[] messagesArray = new string[responses.Count];
+            for (int i = 0; i < messagesArray.Length; i++)
+            {
+                messagesArray[i] = responses.ElementAt(i);
+            }
+            return messagesArray;
         }
-        public object GameHandler(Socket serverSock, string action, string[] args)
+        public static string[] GameHandler(Socket serverSock, string action, string[] args)
         {
             /*
              * Autor: Yuval Didi
@@ -151,7 +182,7 @@ namespace sockets
                 {
                     serverSock.Shutdown(SocketShutdown.Both);
                     serverSock.Close();
-                    return 0;
+                    return null;
                 }
                 else if (action != "NOT MY TURN")
                 {
@@ -176,20 +207,50 @@ namespace sockets
             catch (ArgumentNullException ane)
             {
                 Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
-                return 0;
+                return null;
             }
             catch (SocketException se)
             {
                 Console.WriteLine("SocketException : {0}", se.ToString());
-                return 0;
+                return null;
             }
             catch (Exception e)
             {
                 Console.WriteLine("Unexpected exception : {0}", e.ToString());
-                return 0;
+                return null;
             }
+        }
 
-
+        public static void SendMsg(Socket serverSock, string action, string[] args)
+        {
+            try
+            {
+                if (action == "CLOSE")
+                {
+                    serverSock.Shutdown(SocketShutdown.Both);
+                    serverSock.Close();
+                }
+                else
+                {
+                    //send the data
+                    byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
+                    int bytesSent = serverSock.Send(msg_bytes);
+                    Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
+                    Console.WriteLine("[Communication] Waiting For Response...");
+                }
+            }
+            catch (ArgumentNullException ane)
+            {
+                Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
+            }
+            catch (SocketException se)
+            {
+                Console.WriteLine("SocketException : {0}", se.ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected exception : {0}", e.ToString());
+            }
         }
         public static Socket StartClient(string serverIpStr, int serverPort)
         {
@@ -212,7 +273,7 @@ namespace sockets
                 IPEndPoint remoteEP = new IPEndPoint(serverIp, serverPort);
 
                 //Create a TCP/IP socket
-                Socket serverSock = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket serverSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 //connect to the server
                 try
