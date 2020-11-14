@@ -47,7 +47,7 @@ namespace Taki_Client
 
         private void createButton_Click(object sender, EventArgs e)
         {
-            CreateGamePanel panel = new CreateGamePanel();
+            CreateGamePanel panel = new CreateGamePanel(this);
             this.Parent.Controls.Add(panel);
             this.Parent.Controls.Remove(this);
             panel.Initialize();
@@ -55,7 +55,7 @@ namespace Taki_Client
 
         private void joinButton_Click(object sender, EventArgs e)
         {
-            JoinGamePanel panel = new JoinGamePanel();
+            JoinGamePanel panel = new JoinGamePanel(this);
             this.Parent.Controls.Add(panel);
             this.Parent.Controls.Remove(this);
             panel.Initialize();
