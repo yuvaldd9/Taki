@@ -15,10 +15,12 @@ namespace Taki_Client
         private TextBox lobbyNameInput;
         private TextBox playerNameInput;
         private TextBox passwordInput;
+        private HomePanel homePanel;
 
-        public CreateGamePanel() : base()
+        public CreateGamePanel(HomePanel homePanel) : base()
         {
             this.Dock = DockStyle.Fill;
+            this.homePanel = homePanel;
         }
 
         public void Initialize()
@@ -102,7 +104,11 @@ namespace Taki_Client
 
         void createGame_Click(object Sender, EventArgs e)
         {
-
+            if (this.lobbyNameInput.Text == "" || this.playerNameInput.Text == "" || this.passwordInput.Text == "")
+            {
+                MessageBox.Show("You must fill the details before creating the game", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             Socket socket = Communication.StartClient("127.0.0.1", 8080);
             if (socket == null)
                 MessageBox.Show("An error occured while connecting to the server, please try again");
@@ -115,13 +121,13 @@ namespace Taki_Client
                 if (status != "success")
                 {
                     dynamic msg = JsonConvert.DeserializeObject(jsonArgs);
-                    MessageBox.Show(msg.message.ToString());
+                    MessageBox.Show(msg.message.ToString(), status, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 dynamic args = JsonConvert.DeserializeObject(jsonArgs);
                 string gameID = (string)args.game_id;
                 string jwt = (string)args.jwt;
-                GameLobbyAdmin panel = new GameLobbyAdmin(gameID, this.playerNameInput.Text, this.passwordInput.Text, jwt, socket);
+                GameLobbyAdmin panel = new GameLobbyAdmin(gameID, this.playerNameInput.Text, this.passwordInput.Text, jwt, socket, this.homePanel);
                 panel.Parent = this.Parent;
                 this.Parent.Controls.Add(panel);
                 panel.Initialize();

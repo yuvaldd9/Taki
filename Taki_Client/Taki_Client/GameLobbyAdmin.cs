@@ -24,8 +24,9 @@ namespace Taki_Client
         private ListBox players;
         private bool waiting;
         private bool inGame;
+        private HomePanel homePanel;
 
-        public GameLobbyAdmin(string gameID, string playerName, string password, string jwt, Socket sock) : base()
+        public GameLobbyAdmin(string gameID, string playerName, string password, string jwt, Socket sock, HomePanel homePanel) : base()
         {
             this.gameID = gameID;
             this.password = password;
@@ -35,6 +36,7 @@ namespace Taki_Client
             this.Dock = DockStyle.Fill;
             this.waiting = true;
             this.inGame = false;
+            this.homePanel = homePanel;
         }
 
         public void Initialize()
@@ -144,7 +146,6 @@ namespace Taki_Client
 
                     if (!this.inGame && code == "success")
                     {
-                        MessageBox.Show("Leave");
                         this.waiting = false;
                         continue;
                     }
@@ -170,23 +171,34 @@ namespace Taki_Client
                             deck.AddCard(new Card((string)jsonCard.type, (string)jsonCard.color, (string)jsonCard.value));
                         }
                         this.waiting = false;
+                        this.inGame = true;
                         continue;
                     }
                     if (json.status != "success" && json.code != "success")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
-                        MessageBox.Show(args.message.ToString());
+                        MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         continue;
                     }
                 }
             }
-            GamePanel panel = new GamePanel(deck, enemies, this.playerName);
-            panel.Size = this.Size;
-            GameManager gameManager = new GameManager(deck, enemies, this.playerName, null, this.sock, this.jwt, this.Parent, panel);
-            this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
-            this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
+            if (this.inGame)
+            {
+                GamePanel panel = new GamePanel(deck, enemies, this.playerName);
+                panel.Size = this.Size;
+                GameManager gameManager = new GameManager(deck, enemies, this.playerName, null, this.sock, this.jwt, this.Parent, panel);
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
 
-            gameManager.Run();
+                gameManager.Run();
+            }
+            else
+            {
+
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(this.homePanel); }));
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
+
+            }
         }
 
         void closeGame_Click(object Sender, EventArgs e)
