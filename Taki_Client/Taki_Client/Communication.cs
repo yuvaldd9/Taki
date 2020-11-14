@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CSharp.RuntimeBinder;
+using System.Text.RegularExpressions;
 
 
 namespace Taki_Client
@@ -134,6 +135,21 @@ namespace Taki_Client
             return JsonConvert.SerializeObject(jsonObj);
 
         }
+
+        public static string[] JsonAnalyzer(string data)
+        {
+            dynamic json = JsonConvert.DeserializeObject(data);
+            string[] response = new string[2];
+            if (json.code != null)
+                response[0] = (string)json.code;
+            else
+                response[0] = (string)json.status;
+            if (json.args != null)
+                response[1] = json.args.ToString();
+            else
+                response[1] = "";
+            return response;
+        }
         public static string[] DataAnalyzing(string action, string message)
         {
             /*
@@ -187,7 +203,11 @@ namespace Taki_Client
                 else if (action != "NOT MY TURN")
                 {
                     //send the data
-                    byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
+                    string message = CommandHandler(action, args);
+                    message = message.Replace("Value", "value");
+                    message = message.Replace("Type", "type");
+                    message = message.Replace("Color", "color");
+                    byte[] msg_bytes = Encoding.ASCII.GetBytes(message);
                     int bytesSent = serverSock.Send(msg_bytes);
                     Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
                     Console.WriteLine("[Communication] Waiting For Response...");
@@ -221,7 +241,7 @@ namespace Taki_Client
             }
         }
 
-        public static void SendMsg(Socket serverSock, string action, string[] args)
+        public static void SendMsg(Socket serverSock, string action, object[] args)
         {
             try
             {
@@ -233,9 +253,19 @@ namespace Taki_Client
                 else
                 {
                     //send the data
-                    byte[] msg_bytes = Encoding.ASCII.GetBytes(CommandHandler(action, args));
+                    string message = CommandHandler(action, args);
+                    message = message.Replace("Value", "value");
+                    message = message.Replace("Type", "type");
+                    message = message.Replace("Color", "color");
+                    Regex regex = new Regex("\"[1-9]\"");
+                    MatchCollection matches = regex.Matches(message);
+                    foreach (Match match in matches)
+                    {
+                        message = message.Replace(match.Value, match.Value[1].ToString());
+                    }
+                    byte[] msg_bytes = Encoding.ASCII.GetBytes(message);
                     int bytesSent = serverSock.Send(msg_bytes);
-                    Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
+                    Console.WriteLine("[Communication] Sent\n{0}", message);
                     Console.WriteLine("[Communication] Waiting For Response...");
                 }
             }
