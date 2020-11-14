@@ -22,8 +22,9 @@ namespace Taki_Client
         private bool waiting;
         private bool inGame;
         private string name;
+        private HomePanel homePanel;
 
-        public GameLobbyPlayer(string gameID, string password, string jwt, Socket sock, string name) : base()
+        public GameLobbyPlayer(string gameID, string password, string jwt, Socket sock, string name, HomePanel homePanel) : base()
         {
             this.gameID = gameID;
             this.password = password;
@@ -31,8 +32,9 @@ namespace Taki_Client
             this.sock = sock;
             this.Dock = DockStyle.Fill;
             this.waiting = true;
-            this.inGame = true;
+            this.inGame = false;
             this.name = name;
+            this.homePanel = homePanel;
         }
 
         public void Initialize(List<string> playersList)
@@ -151,17 +153,32 @@ namespace Taki_Client
                             deck.AddCard(new Card((string)jsonCard.type, (string)jsonCard.color, (string)jsonCard.value));
                         }
                         this.waiting = false;
+                        this.inGame = true;
                         continue;
 
                     }
+                    if (json.status != "success" && json.code != "success")
+                    {
+                        dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
+                        MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
                 }
             }
-            GamePanel panel = new GamePanel(deck, enemies, this.name);
-            panel.Size = this.Size;
-            GameManager gameManager = new GameManager(deck, enemies, this.name, null, this.sock, this.jwt, this.Parent, panel);
-            this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
-            this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
-            gameManager.Run();
+            if (this.inGame)
+            {
+                GamePanel panel = new GamePanel(deck, enemies, this.name);
+                panel.Size = this.Size;
+                GameManager gameManager = new GameManager(deck, enemies, this.name, null, this.sock, this.jwt, this.Parent, panel);
+                this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
+                this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
+                gameManager.Run();
+            }
+            else
+            {
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(this.homePanel); }));
+                this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
+            }
 
         }
 
@@ -169,6 +186,7 @@ namespace Taki_Client
         {
             Communication.SendMsg(this.sock, "leave_game", new string[] { this.jwt });
             this.inGame = false;
+            this.waiting = false;
 
         }
     }

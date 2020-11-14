@@ -16,10 +16,12 @@ namespace Taki_Client
         private TextBox gameIDInput;
         private TextBox playerNameInput;
         private TextBox passwordInput;
+        private HomePanel homepanel;
 
-        public JoinGamePanel()
+        public JoinGamePanel(HomePanel homepanel)
         {
             this.Dock = DockStyle.Fill;
+            this.homepanel = homepanel;
         }
 
         public void Initialize()
@@ -103,6 +105,11 @@ namespace Taki_Client
 
         void joinGame_Click(object sender, EventArgs e)
         {
+            if (this.gameIDInput.Text == "" | this.playerNameInput.Text == "" || this.passwordInput.Text == "")
+            {
+                MessageBox.Show("You must fill the details before joining the game", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             Socket socket = Communication.StartClient("127.0.0.1", 8080);
             if (socket == null)
                 MessageBox.Show("An error occured while connecting to the server, please try again");
@@ -113,14 +120,18 @@ namespace Taki_Client
                 string status = json.status;
                 string jsonArgs = json.args.ToString();
                 if (status != "success")
+                {
+                    dynamic msg = JsonConvert.DeserializeObject(jsonArgs);
+                    MessageBox.Show(msg.message.ToString(), status, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
+                }
                 dynamic args = JsonConvert.DeserializeObject(jsonArgs);
                 string jwt = args.jwt;
                 JArray players = args.players;
                 List<string> playersList = new List<string>();
                 foreach (string player in players)
                     playersList.Add(player);
-                GameLobbyPlayer panel = new GameLobbyPlayer(this.gameIDInput.Text, this.passwordInput.Text, jwt, socket, this.playerNameInput.Text);
+                GameLobbyPlayer panel = new GameLobbyPlayer(this.gameIDInput.Text, this.passwordInput.Text, jwt, socket, this.playerNameInput.Text, this.homepanel);
                 panel.Parent = this.Parent;
                 this.Parent.Controls.Add(panel);
                 panel.Initialize(playersList);
