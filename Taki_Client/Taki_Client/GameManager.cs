@@ -19,6 +19,7 @@ namespace Taki_Client
         private Card topCard;
         private Socket sock;
         private string jwt;
+        private string[] leaderboard;
         public GameManager(Deck deck, List<Enemy> enemies, string playerName, Card topCard, Socket sock, string jwt, Control parent, GamePanel panel)
         {
             this.jwt = jwt;
@@ -30,6 +31,11 @@ namespace Taki_Client
             this.panel = panel;
             this.panel.Initialize(topCard);
             this.sock = sock;
+            this.leaderboard = new string[enemies.Count + 1];
+            for (int i = 0; i < this.leaderboard.Length; i++)
+            {
+                this.leaderboard[i] = "";
+            }
         }
 
         public void Run()
@@ -62,7 +68,7 @@ namespace Taki_Client
                                 action = bot.ChooseAction();
                                 if (action != null && action.Count > 0)
                                 {
-                                    
+                                        
 
                                     Communication.SendMsg(this.sock, "place_cards", new object[] { action.ToArray(), this.jwt });
                                     foreach (Card card in action)
@@ -94,7 +100,7 @@ namespace Taki_Client
                                         cards_taken.Add(null);
                                     panel.TakeCards(playerName, cards_taken);
                                     System.Threading.Thread.Sleep(7000);
-                                    foreach(Enemy enemy in this.enemies)
+                                    foreach (Enemy enemy in this.enemies)
                                     {
                                         if (enemy.name == playerName)
                                             enemy.UpdateState(-amount);
@@ -126,7 +132,7 @@ namespace Taki_Client
                             }
                             break;
                         case "success":
-                            if(waitingForCards && args.cards != null)
+                            if (waitingForCards && args.cards != null)
                             {
                                 cards = args.cards;
 
@@ -145,8 +151,42 @@ namespace Taki_Client
                             }
                             break;
                         case "player_finished":
+                            for (int i = 0; i < this.leaderboard.Length; i++)
+                            {
+                                if (this.leaderboard[i] == "")
+                                {
+                                    this.leaderboard[i] = args.player_name.ToString();
+                                    break;
+                                }
+                            }
+
+                            break;
+
+                        case "player_left":
+                            for (int i = this.leaderboard.Length - 1; i >= 0; i--)
+                            {
+                                if (this.leaderboard[i] == "")
+                                {
+                                    this.leaderboard[i] = args.player_name.ToString();
+                                    break;
+                                }
+
+                            }
+
                             break;
                         case "game_ended":
+                            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(this.leaderboard);
+                            this.panel.Parent.Invoke(new MethodInvoker(delegate () { this.panel.Parent.Controls.Add(leaderboardPanel); }));
+                            leaderboardPanel.Initialize();
+                            this.panel.Parent.Invoke(new MethodInvoker(delegate () { this.panel.Parent.Controls.Remove(this.panel); }));
+                            break;
+
+                        case "bad_request":
+                            if (args.message != null && args.message.ToString() == "Invalid move done.")
+                            {
+                                Communication.SendMsg(this.sock, "take_cards", new string[] { this.jwt });
+                                waitingForCards = true;
+                            }
                             break;
                         default:
                             Console.WriteLine(jsonArr[0]);
@@ -158,7 +198,7 @@ namespace Taki_Client
                 data = Communication.GameHandler(sock, "NOT MY TURN", null);
 
             }
-            
+         
         }
     }
 }
