@@ -68,7 +68,7 @@ namespace Taki_Client
             enemy1Label.Font = new Font("Arial", 14);
             enemy1Label.AutoSize = true;
             this.Controls.Add(enemy1Label);
-            enemy1Label.Location = new Point(20, (this.Height - enemy1Label.Height) / 2);
+            enemy1Label.Location = new Point(20, 160);
 
             Label enemy2Label = new Label();
             enemy2Label.Text = this.enemies.ElementAt(1).name;
@@ -82,7 +82,7 @@ namespace Taki_Client
             enemy3Label.Font = new Font("Arial", 14);
             enemy3Label.AutoSize = true;
             this.Controls.Add(enemy3Label);
-            enemy3Label.Location = new Point(this.Width - 20, (this.Height - enemy1Label.Height) / 2);
+            enemy3Label.Location = new Point(this.Width - 20 - enemy3Label.Width, 160);
 
             //Load player's cards
             PictureBox cardPicture;
