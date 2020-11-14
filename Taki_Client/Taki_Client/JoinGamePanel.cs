@@ -105,7 +105,7 @@ namespace Taki_Client
 
         void joinGame_Click(object sender, EventArgs e)
         {
-            if (this.gameIDInput.Text == "" | this.playerNameInput.Text == "" || this.passwordInput.Text == "")
+            if (this.gameIDInput.Text == "" || this.playerNameInput.Text == "" || this.passwordInput.Text == "")
             {
                 MessageBox.Show("You must fill the details before joining the game", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
