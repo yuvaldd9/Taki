@@ -16,13 +16,7 @@ namespace Taki_Client
         public Form1()
         {
             InitializeComponent();
-            CreateGamePanel panel = new CreateGamePanel();
-            //GameLobbyAdmin panel = new GameLobbyAdmin("1234", "abcde1234", "hstebryjhny", null);
-            //JoinGamePanel panel = new JoinGamePanel();
-            //GameLobbyPlayer panel = new GameLobbyPlayer("1234", "abcde1234", "hstebryjhny", null);
-            panel.Parent = this;
-            this.Controls.Add(panel);
-            panel.Initialize();
+
         }
     }
 }
