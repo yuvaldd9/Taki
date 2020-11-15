@@ -123,6 +123,7 @@ namespace Taki_Client
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
                         player_name = args.player_name.ToString();
                         this.Invoke(new MethodInvoker(delegate () { this.players.Items.Add(player_name); }));
+                        continue;
                     }
 
                     if (code == "player_left")
@@ -130,6 +131,7 @@ namespace Taki_Client
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
                         player_name = args.player_name.ToString();
                         this.Invoke(new MethodInvoker(delegate () { this.players.Items.Remove(player_name); }));
+                        continue;
                     }
 
                     if (code == "game_starting")
