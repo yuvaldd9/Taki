@@ -104,7 +104,7 @@ namespace Taki_Client
         {
             string[] messages;
             Deck deck = new Deck(new List<Card>());
-            string player_name, code;
+            string player_name, code, currentPlayer = "";
             List<Enemy> enemies = new List<Enemy>();
             JArray players, cards;
             dynamic json;
@@ -159,10 +159,17 @@ namespace Taki_Client
                         continue;
 
                     }
+                    else if (code == "update_turn")
+                    {
+                        dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
+                        currentPlayer = (string)args.current_player;
+                        continue;
+                    }
                     else if (json.status != "success" && json.code != "success")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
-                        MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        if (args.message != null)
+                            MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         continue;
                     }
                 }
@@ -174,7 +181,7 @@ namespace Taki_Client
                 GameManager gameManager = new GameManager(deck, enemies, this.name, null, this.sock, this.jwt, this.Parent, panel);
                 this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
                 this.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
-                gameManager.Run();
+                gameManager.Run(currentPlayer);
             }
             else
             {

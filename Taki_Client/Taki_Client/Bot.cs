@@ -9,7 +9,7 @@ namespace Taki_Client
     public enum StateCodes
     {
         next_1_low_cards, next_2_low_cards, next_3_low_cards, taki, super_taki,
-        plus2, stop, change_color, last_card, no_match, change_direction, plus, got_plus2
+        plus2, stop, change_color, last_card, no_match, change_direction, plus, got_plus2, number_card
     }
     class Bot
     {
@@ -28,12 +28,13 @@ namespace Taki_Client
             this.deck = deck;
             this.enemies = enemies;
             this.rules = new List<Rule>();
+            this.GenerateRules();
         }
 
         private void GenerateRules()
         {
             //Example for a how a rule might be
-            Rule r1 = new Rule(StateCodes.Plus2.ToString(),
+            Rule r1 = new Rule(StateCodes.plus2.ToString(),
                     new ValidTypes[] { ValidTypes.plus_2 });
             this.rules.Add(r1);
 
@@ -87,15 +88,15 @@ namespace Taki_Client
                     {
                         priorityList.Add(type);
                     }
-                   
+
                 }
             }
             //priorityList include all the recommened cards which we have in the current turn
 
             //Check if the top card forces the bot to do a specific action
-            if ((this.topCard.Type != ValidTypes.number_card.ToString()) && this.isTopCardActive)
+            if (this.topCard != null && (this.topCard.Type != ValidTypes.number_card.ToString()) && this.isTopCardActive)
             {
-                if (this.topCard.Type == ValidTypes.plus_2.ToString() && currentState.Contains(ValidTypes.plus_2.ToString()))
+                if (this.topCard.Type == ValidTypes.plus_2.ToString() && currentState.Contains(StateCodes.plus2.ToString()))
                 {
                     foreach (Card card in this.deck)
                     {
@@ -105,11 +106,9 @@ namespace Taki_Client
                             return new List<Card>(new Card[] { card });
                         }
                     }
-                }
-                else
-                {
                     return null;
                 }
+
 
                 if (this.topCard.Type == ValidTypes.stop.ToString())
                 {
@@ -180,13 +179,13 @@ namespace Taki_Client
 
                 }
 
-                /*if (action != null)
-                    break;*/
+                if (action != null)
+                    break;
             }
             return action;
         }
 
-        
+
         public int FindMaxIndex(int[] arr)
         {
             int maxIndex = 0;
@@ -227,7 +226,7 @@ namespace Taki_Client
                         colorArr[2]++;
                         break;
                     default:
-                        if(card.Type == ValidTypes.super_taki.ToString() || card.Type == ValidTypes.change_color.ToString())
+                        if (card.Type == ValidTypes.super_taki.ToString() || card.Type == ValidTypes.change_color.ToString())
                             colorArr[3]++;
                         break;
                 }
@@ -243,7 +242,7 @@ namespace Taki_Client
                     return "green";
                 case -1:
                     Random random = new Random();
-                    return new string[]{"red", "blue", "yellow", "green" }[random.Next(4)];
+                    return new string[] { "red", "blue", "yellow", "green" }[random.Next(4)];
                 default:
                     return "yellow";
             }
@@ -252,13 +251,14 @@ namespace Taki_Client
         {
             //Returns string that contains all the relevant flags for the current state
             int matches = 0;
-         
+
             string state = DominantColor() + " ";//state = dominant color -> states
 
             if (this.deck.Length == 1)
                 state += StateCodes.last_card + " ";
 
-            if (this.topCard.Type == ValidTypes.plus_2.ToString())
+
+            if (this.topCard != null && this.topCard.Type == ValidTypes.plus_2.ToString())
                 state += StateCodes.got_plus2 + " ";
 
             foreach (Enemy enemy in this.enemies)
@@ -273,37 +273,37 @@ namespace Taki_Client
             foreach (Card card in this.deck.cards)
             {
                 //find general cards
-                if(card.Type == ValueTypes.number_card.ToString() && card.Color == this.topCard.Color && !state.Contains(StateCodes.number_card + " "))
+                if (card.Type == ValidTypes.number_card.ToString() && !state.Contains(StateCodes.number_card + " "))
                     state += StateCodes.number_card + " ";
                 if (card.Type == ValidTypes.change_color.ToString())
                 {
                     matches++;
-                    state += ValidTypes.change_color + " ";
+                    state += StateCodes.change_color + " ";
                 }
 
                 if (card.Type == ValidTypes.change_direction.ToString())
                 {
                     matches++;
-                    state += ValidTypes.change_direction + " ";
+                    state += StateCodes.change_direction + " ";
                 }
                 if (card.Type == ValidTypes.super_taki.ToString())
                 {
                     matches++;
-                    state += ValidTypes.super_taki + " ";
+                    state += StateCodes.super_taki + " ";
                 }
                 if (card.Type == ValidTypes.plus.ToString())
-                    state += ValidTypes.plus + " ";
+                    state += StateCodes.plus + " ";
                 if (card.Type == ValidTypes.stop.ToString())
-                    state += ValidTypes.stop + " ";
+                    state += StateCodes.stop + " ";
                 if (card.Type == ValidTypes.taki.ToString())
-                    state += ValidTypes.taki + " ";
+                    state += StateCodes.taki + " ";
                 if (card.Type == ValidTypes.plus_2.ToString())
-                    state += ValidTypes.plus_2 + " ";
+                    state += StateCodes.plus2 + " ";
                 if (matches == 0)
                 {
                     state += StateCodes.no_match + " ";
                     if (state.Contains(ValidTypes.plus.ToString()))
-                        state.Replace(ValidTypes.plus.ToString() + " ", "");
+                        state.Replace(StateCodes.plus.ToString() + " ", "");
                 }
             }
 
@@ -349,11 +349,25 @@ namespace Taki_Client
         private List<Card> GetCardsByColor(string color)
         {
             List<Card> cards = new List<Card>();
+            List<Card> endTurnCards = new List<Card>();
             foreach (Card card in this.deck)
             {
                 if (card.Color == color)
+                {
                     cards.Add(card);
+                    if (card.Type == ValidTypes.change_color.ToString() || card.Type == ValidTypes.change_direction.ToString()
+                            || card.Type == ValidTypes.plus_2.ToString() || card.Type == ValidTypes.stop.ToString())
+                    {
+                        cards.Remove(card);
+                        endTurnCards.Add(card);
+                    }
+                }
+
+
+
             }
+            if (endTurnCards.Count > 0)
+                cards.Add(endTurnCards.ElementAt(0));
             return cards;
         }
 
@@ -372,12 +386,27 @@ namespace Taki_Client
                         {
                             action = new List<Card>(new Card[] { card });
                             this.deck.RemoveCard(card); //Simulate the new deck
-                            if (type == ValidTypes.taki)
+                            if (card.Type == ValidTypes.taki.ToString())
                                 action.AddRange(this.GetCardsByColor(card.Color));
-                            if (type == ValidTypes.super_taki)
+                            if (card.Type == ValidTypes.super_taki.ToString())
+                            {
+                                action.Remove(card);
+                                action.Add(new Card("super_taki", this.topCard.Color, ""));
                                 action.AddRange(this.GetCardsByColor(this.topCard.Color));
-                            if (type == ValidTypes.plus)
-                                action.AddRange(this.GetCardsAfterPlus(card, priorityList));
+                            }
+
+                            if (card.Type == ValidTypes.plus.ToString())
+                            {
+                                if (this.GetCardsAfterPlus(card, priorityList) != null)
+                                    action.AddRange(this.GetCardsAfterPlus(card, priorityList));
+                                else
+                                    action.Remove(card);
+                            }
+                            if (card.Type == ValidTypes.change_color.ToString())
+                            {
+                                action.Remove(card);
+                                action.Add(new Card("change_color", this.DominantColor(), ""));
+                            }
                             this.deck.AddCard(card); //Restore the original deck
                             break;
                         }

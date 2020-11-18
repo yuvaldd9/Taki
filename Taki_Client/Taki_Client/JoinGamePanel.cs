@@ -110,7 +110,7 @@ namespace Taki_Client
                 MessageBox.Show("You must fill the details before joining the game", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            Socket socket = Communication.StartClient("127.0.0.1", 8080);
+            Socket socket = Communication.StartClient("104.156.225.184", 8080);
             if (socket == null)
                 MessageBox.Show("An error occured while connecting to the server, please try again");
             else
