@@ -126,7 +126,7 @@ namespace Taki_Client
                         continue;
                     }
 
-                    if (code == "player_left")
+                    else if (code == "player_left")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
                         player_name = args.player_name.ToString();
@@ -134,7 +134,7 @@ namespace Taki_Client
                         continue;
                     }
 
-                    if (code == "game_starting")
+                    else if (code == "game_starting")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
                         players = args.players;
@@ -159,7 +159,7 @@ namespace Taki_Client
                         continue;
 
                     }
-                    if (json.status != "success" && json.code != "success")
+                    else if (json.status != "success" && json.code != "success")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
                         MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
