@@ -113,7 +113,7 @@ namespace Taki_Client
         private void WaitForPlayers()
         {
             string[] messages;
-            string player_name, code;
+            string player_name, code, currentPlayer = "";
             dynamic json;
             JArray players, cards;
             Deck deck = new Deck(new List<Card>());
@@ -174,10 +174,17 @@ namespace Taki_Client
                         this.inGame = true;
                         continue;
                     }
+                    if (code == "update_turn")
+                    {
+                        dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
+                        currentPlayer = (string)args.current_player;
+                        continue;
+                    }
                     if (json.status != "success" && json.code != "success")
                     {
                         dynamic args = JsonConvert.DeserializeObject(json.args.ToString());
-                        MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        if (args.message != null)
+                            MessageBox.Show(args.message.ToString(), (string)json.status, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         continue;
                     }
                 }
@@ -190,7 +197,7 @@ namespace Taki_Client
                 this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Add(panel); }));
                 this.Parent.Invoke(new MethodInvoker(delegate () { this.Parent.Controls.Remove(this); }));
 
-                gameManager.Run();
+                gameManager.Run(currentPlayer);
             }
             else
             {

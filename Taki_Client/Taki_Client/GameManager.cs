@@ -38,7 +38,7 @@ namespace Taki_Client
             }
         }
 
-        public void Run()
+        public void Run(string startingPlayer="")
         {
             string[] jsonArr;
             dynamic args;
@@ -48,6 +48,23 @@ namespace Taki_Client
             JArray cards;
             dynamic jCards;
             bool waitingForCards = false;
+            if(startingPlayer == this.playerName)
+            {
+                action = bot.ChooseAction();
+                if (action != null && action.Count > 0)
+                {
+
+
+                    Communication.SendMsg(this.sock, "place_cards", new object[] { action.ToArray(), this.jwt });
+                    foreach (Card card in action)
+                        this.bot.deck.RemoveCard(card);
+                }
+                else
+                {
+                    Communication.SendMsg(this.sock, "take_cards", new string[] { this.jwt });
+                    waitingForCards = true;
+                }
+            }
             
             string[] data = Communication.GameHandler(sock, "NOT MY TURN", null);
             while (true)
