@@ -79,9 +79,11 @@ namespace Taki_Client
             this.passwordInput.Size = new Size(200, (new Font("Arial", 14).Height) + 8);
 
             int maxLength = Math.Max(lobbyName.Width, Math.Max(playerName.Width, password.Width));
-            this.lobbyNameInput.Location = new Point(10 + maxLength + 10, this.Height / 5 - 5);
-            this.playerNameInput.Location = new Point(10 + maxLength + 10, 2 * this.Height / 5 - 5);
-            this.passwordInput.Location = new Point(10 + maxLength + 10, 3 * this.Height / 5 - 5);
+            int inputX = 10 + maxLength + 10;
+            int heightUnit = this.Height / 5;
+            this.lobbyNameInput.Location = new Point(inputX, heightUnit - 5);
+            this.playerNameInput.Location = new Point(inputX, 2 * heightUnit - 5);
+            this.passwordInput.Location = new Point(inputX, 3 * heightUnit - 5);
 
             PictureBox logo = new PictureBox();
             logo.SizeMode = PictureBoxSizeMode.StretchImage;
