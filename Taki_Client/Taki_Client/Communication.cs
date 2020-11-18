@@ -209,6 +209,7 @@ namespace Taki_Client
                     message = message.Replace("Color", "color");
                     byte[] msg_bytes = Encoding.ASCII.GetBytes(message);
                     int bytesSent = serverSock.Send(msg_bytes);
+                    Console.WriteLine(CommandHandler(action, args));
                     Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
                     Console.WriteLine("[Communication] Waiting For Response...");
                 }
