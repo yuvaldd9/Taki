@@ -25,7 +25,7 @@ namespace Taki_Client
             {
                 throw new ArgumentException("Illegal type", "type");
             }
-            if (!Array.Exists(Enum.GetNames(typeof(ValidColors)), card_color => card_color == color || card_color == ""))
+            if (!Array.Exists(Enum.GetNames(typeof(ValidColors)), card_color => card_color == color) && color != "")
             {
                 throw new ArgumentException("Illegal color", "color");
             }
@@ -57,6 +57,10 @@ namespace Taki_Client
         }
         public bool Equals(Card card)
         {
+            if (this.type == ValidTypes.change_color.ToString() || this.type == ValidTypes.super_taki.ToString())
+            {
+                return this.type == card.type;
+            }
             return this.type == card.type && this.color == card.color && this.value == card.value;
         }
     }

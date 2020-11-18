@@ -16,7 +16,14 @@ namespace Taki_Client
         public Form1()
         {
             InitializeComponent();
-
+            //Resize thw window to be a square
+            this.Size = new Size(this.Width, this.Width);
+            
+            //Load the home window
+            HomePanel panel = new HomePanel();
+            panel.Parent = this;
+            this.Controls.Add(panel);
+            panel.Initialize();
         }
     }
 }
