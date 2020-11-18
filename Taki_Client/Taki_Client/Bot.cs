@@ -312,16 +312,38 @@ namespace Taki_Client
 
         private bool CheckCard(Card card, Card topCard)
         {
-            //Number cards must have the same value or color of the top card
-            if (card.Type == ValidTypes.number_card.ToString())
-                return card.Value == topCard.Value || card.Color == topCard.Color;
-
-            //Super taki and change color don't have a value or a color
+            if (topCard == null)
+                return true;
             if (card.Type == ValidTypes.super_taki.ToString() || card.Type == ValidTypes.change_color.ToString())
                 return true;
+            if (topCard.Type == ValidTypes.number_card.ToString())
+            {
+                //Number cards must have the same value or color of the top card
+                if (card.Type == ValidTypes.number_card.ToString())
+                    return card.Value == topCard.Value || card.Color == topCard.Color;
 
-            //Other special cards must have the same color or type of the top card
-            return card.Color == topCard.Color || card.Type == topCard.Type;
+                //Super taki and change color don't have a value or a color
+                if (card.Type == ValidTypes.super_taki.ToString() || card.Type == ValidTypes.change_color.ToString())
+                    return true;
+
+                //Other special cards must have the same color or type of the top card
+                return card.Color == topCard.Color || card.Type == topCard.Type;
+            }
+            else if (topCard.Type == ValidTypes.super_taki.ToString() || topCard.Type == ValidTypes.change_color.ToString())
+                return topCard.Color == card.Color;
+            else
+            {
+                //Number cards must have the same value or color of the top card
+                if (card.Type == ValidTypes.number_card.ToString())
+                    return card.Color == topCard.Color;
+
+                //Super taki and change color don't have a value or a color
+                if (card.Type == ValidTypes.super_taki.ToString() || card.Type == ValidTypes.change_color.ToString())
+                    return topCard.Color == card.Color;
+
+                //Other special cards must have the same color or type of the top card
+                return card.Color == topCard.Color || card.Type == topCard.Type;
+            }
         }
 
         private List<Card> GetCardsByColor(string color)
