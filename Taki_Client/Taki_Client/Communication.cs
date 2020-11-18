@@ -22,7 +22,7 @@ namespace Taki_Client
     }
     class Game
     {
-        public string game_id { get; set; }
+        public int game_id { get; set; }
         public string player_name { get; set; }
         public string password { get; set; }
     }
@@ -78,7 +78,7 @@ namespace Taki_Client
                     Game game = new Game()
                     {
 
-                        game_id = (string)args[0],
+                        game_id = int.Parse((string)args[0]),
                         player_name = (string)args[1],
                         password = (string)args[2]
                     };
@@ -209,6 +209,7 @@ namespace Taki_Client
                     message = message.Replace("Color", "color");
                     byte[] msg_bytes = Encoding.ASCII.GetBytes(message);
                     int bytesSent = serverSock.Send(msg_bytes);
+                    Console.WriteLine(CommandHandler(action, args));
                     Console.WriteLine("[Communication] Sent\n{0}", msg_bytes.ToString());
                     Console.WriteLine("[Communication] Waiting For Response...");
                 }
