@@ -12,12 +12,14 @@ namespace Taki_Client
     {
         public HomePanel() : base()
         {
+            //Define panel attributes
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.Gray;
         }
 
         public void Initialize()
         {
+            //Load the taki logo and draw it
             PictureBox logo = new PictureBox();
             logo.SizeMode = PictureBoxSizeMode.StretchImage;
             Bitmap logoImage = new Bitmap(@"..\\..\\Resources\\Taki Logo Horizontal.jpg");
@@ -26,6 +28,8 @@ namespace Taki_Client
             logo.Location = new Point((this.Width - logo.Width) / 2, 30);
             this.Controls.Add(logo);
 
+
+            //Add a button for creating a game
             Button createGame = new Button();
             createGame.Text = "Create Game";
             createGame.Font = new Font("Arial", 16);
@@ -35,6 +39,7 @@ namespace Taki_Client
             createGame.Location = new Point(logo.Left, this.Height * 3 / 4);
             this.Controls.Add(createGame);
 
+            //Add a button for joining a game
             Button joinGame = new Button();
             joinGame.Text = "Join Game";
             joinGame.Font = new Font("Arial", 16);
@@ -47,6 +52,7 @@ namespace Taki_Client
 
         private void createButton_Click(object sender, EventArgs e)
         {
+            //Remove the current panel and load the panel for creating a game
             CreateGamePanel panel = new CreateGamePanel(this);
             this.Parent.Controls.Add(panel);
             this.Parent.Controls.Remove(this);
@@ -55,6 +61,7 @@ namespace Taki_Client
 
         private void joinButton_Click(object sender, EventArgs e)
         {
+            //Remove the current panel and load the panel for joining a game
             JoinGamePanel panel = new JoinGamePanel(this);
             this.Parent.Controls.Add(panel);
             this.Parent.Controls.Remove(this);
